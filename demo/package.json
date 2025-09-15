@@ -1,0 +1,14 @@
+{
+  "name": "demo",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "bun --watch src/serve.ts",
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}

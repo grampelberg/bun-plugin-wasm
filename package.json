@@ -1,0 +1,25 @@
+{
+  "name": "bun-plugin-wasm",
+  "scripts": {
+    "format:check": "biome format",
+    "lint:check": "biome lint --error-on-warnings && tsc --noEmit",
+    "lint:fix": "biome lint --fix --error-on-warnings",
+    "test": "bun test",
+    "test:dev": "bun test --watch"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.2.4",
+    "@eslint/js": "^9.35.0",
+    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
+    "@types/bun": "latest",
+    "eslint": "^9.35.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-unicorn": "^61.0.2",
+    "ora": "^8.2.0",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.43.0"
+  },
+  "dependencies": {
+    "tslog": "^4.9.3"
+  }
+}
