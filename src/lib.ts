@@ -55,6 +55,8 @@ const wasmPlugin: BunPlugin = {
               createPatch(fname, result.contents, contents),
             )
           }
+
+          result.contents = contents
         }
 
         return result

@@ -34,8 +34,18 @@ const getVarName = (node: ts.ImportDeclaration): ts.Identifier | undefined => {
   return
 }
 
+/* Transforms normal imports into something that loads WASM correctly.
+ *
+ *
+ */
 const toCompile: ts.TransformerFactory<ts.SourceFile> = ctx => {
   const { factory } = ctx
+
+  const other = (node: ts.Node): ts.Node => {
+    console.log('yay')
+
+    return ts.visitEachChild(node, other, ctx)
+  }
 
   const visit: ts.Visitor = (node: ts.Node): ts.Node => {
     if (
@@ -51,13 +61,7 @@ const toCompile: ts.TransformerFactory<ts.SourceFile> = ctx => {
     if (!varName) return node
 
     const assetPath = factory.createCallExpression(
-      factory.createPropertyAccessExpression(
-        factory.createMetaProperty(
-          ts.SyntaxKind.ImportKeyword,
-          factory.createIdentifier('meta'),
-        ),
-        factory.createIdentifier('resolve'),
-      ),
+      factory.createIdentifier('import'),
       undefined,
       [factory.createStringLiteral(node.moduleSpecifier.text)],
     )

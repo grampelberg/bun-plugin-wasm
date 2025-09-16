@@ -1,4 +1,4 @@
-import * as stuff from '../rust/pkg/bun_wasm_demo_bg.js'
+import * as stuff from '../rust/pkg/bun_wasm_demo.js'
 
 // import wasm from '../rust/pkg/bun_wasm_demo_bg.wasm'
 
