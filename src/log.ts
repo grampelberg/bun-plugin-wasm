@@ -6,7 +6,7 @@ import { name } from '../package.json'
 
 const key = 'LOG_LEVEL'
 
-const levelMap: Record<string, number> = {
+export const levelMap: Record<string, number> = {
   silly: 0,
   trace: 1,
   debug: 2,
