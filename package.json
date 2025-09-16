@@ -1,5 +1,7 @@
 {
-  "name": "bun-plugin-wasm",
+  "name": "@grampelberg/bun-plugin-wasm",
+  "workspaces": ["demo"],
+  "module": "src/lib.ts",
   "scripts": {
     "format:check": "biome format",
     "lint:check": "biome lint --error-on-warnings && tsc --noEmit",
@@ -8,9 +10,12 @@
     "test:dev": "bun test --watch"
   },
   "devDependencies": {
+    "@babel/plugin-proposal-import-wasm-source": "^7.27.1",
     "@biomejs/biome": "2.2.4",
     "@eslint/js": "^9.35.0",
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
+    "@types/babel-core": "^6.25.10",
+    "@types/babel-types": "^7.0.16",
     "@types/bun": "latest",
     "eslint": "^9.35.0",
     "eslint-config-prettier": "^10.1.8",
@@ -20,6 +25,9 @@
     "typescript-eslint": "^8.43.0"
   },
   "dependencies": {
+    "@babel/core": "^7.28.4",
+    "@types/babel-traverse": "^6.25.10",
+    "demo": "workspace:*",
     "tslog": "^4.9.3"
   }
 }

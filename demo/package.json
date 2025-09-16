@@ -5,6 +5,9 @@
   "scripts": {
     "dev": "bun --watch src/serve.ts",
   },
+  "dependencies": {
+    "@grampelberg/bun-plugin-wasm": "file:..",
+  },
   "devDependencies": {
     "@types/bun": "latest"
   },
