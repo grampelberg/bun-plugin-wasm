@@ -96,10 +96,10 @@ test('build', async () => {
     // console.log(content)
 
     try {
-      expect(content).toContain('WebAssembly.compileStreaming')
+      expect(content).toContain('WebAssembly.instantiateStreaming')
     } catch {
       throw new Error(
-        `couldn't find WebAssembly.compileStreaming in the output, see file for full output:\n\t${entry.path}`,
+        `couldn't find WebAssembly.instantiateStreaming in the output, see file for full output:\n\t${entry.path}`,
       )
     }
   })
