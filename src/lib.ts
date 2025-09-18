@@ -41,6 +41,7 @@ const wasmPlugin: BunPlugin = {
           return result
         }
 
+        // TODO: gate this on ESM only.
         const imps = new Transpiler({ loader: result.loader }).scanImports(
           result.contents,
         )

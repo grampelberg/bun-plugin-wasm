@@ -20,9 +20,7 @@ import wasmPlugin from './lib.ts'
 import { log } from './log.ts'
 
 const WASM_PATH = './demo/rust'
-const ARTIFACT_DIR = './test'
-
-// beforeAll(async () => {
+const ARTIFACT_DIR = './test' // beforeAll(async () => {
 //   const spinner = ora('Building WASM').start()
 //   const proc = spawn(['wasm-pack', 'build'], {
 //     cwd: WASM_PATH,
@@ -41,7 +39,7 @@ const ARTIFACT_DIR = './test'
 //   log.debug('compilation', stderr)
 // })
 
-// TODO: make this into a case test for valid and invalid input
+// TODO: add tests for different import styles (and maybe anti-tests?)
 test('build', async () => {
   const targets = ['browser', 'node']
   const key = randomUUIDv7()

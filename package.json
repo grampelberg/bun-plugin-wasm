@@ -29,6 +29,7 @@
     "@types/babel-traverse": "^6.25.10",
     "demo": "workspace:*",
     "diff": "^8.0.2",
-    "tslog": "^4.9.3"
+    "tslog": "^4.9.3",
+    "zod": "^4.1.9"
   }
 }
