@@ -2,6 +2,9 @@
   "name": "demo",
   "type": "module",
   "private": true,
+  "exports": {
+    "./index": "./src/index.html",
+  },
   "scripts": {
     "dev": "bun --watch src/serve.ts",
   },

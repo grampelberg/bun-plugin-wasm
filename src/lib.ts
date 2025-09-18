@@ -47,7 +47,11 @@ const wasmPlugin: BunPlugin = {
         )
 
         if (imps.find(i => i.path.endsWith('.wasm'))) {
-          const contents = transform(result.contents, fname, result.loader)
+          const contents = transform(result.contents, {
+            target: build.target,
+            path: fname,
+            loader: result.loader,
+          })
 
           if (log.settings.minLevel <= (levelMap.debug || 0)) {
             log.debug(

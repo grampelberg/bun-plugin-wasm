@@ -1,15 +1,13 @@
 # demo
 
-To install dependencies:
+To run, you'll want to first install the Rust dependencies:
 
 ```bash
-bun install
+cargo install wasm-pack
 ```
 
-To run:
+Then, build the Rust code to WebAssembly:
 
 ```bash
-bun run index.ts
+cd ../rust && wasm-pack build
 ```
-
-This project was created using `bun init` in bun v1.2.21. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.

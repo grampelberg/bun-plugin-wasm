@@ -6,6 +6,12 @@ import * as ts from 'typescript'
 
 import { log } from './log.ts'
 
+type TransformConfig = {
+  target: 'browser' | 'bun'
+  path: string
+  loader: JavaScriptLoader
+}
+
 type JavaScriptLoader = NonNullable<TranspilerOptions['loader']>
 
 type ModuleImportSource = {
@@ -61,7 +67,7 @@ const debugNode = (node: ts.Node): string => {
   return printer.printNode(ts.EmitHint.Unspecified, node, src)
 }
 
-const toCompile = (fname: string) => {
+const toCompile = (cfg: TransformConfig) => {
   return (ctx: ts.TransformationContext): ts.Transformer<ts.SourceFile> => {
     const { factory } = ctx
 
@@ -148,21 +154,35 @@ const toCompile = (fname: string) => {
      * Ideally, the namespaced version is only ever used as that is what wasm-pack
      * does today.
      */
-    const getFetchNode = (nameIdent: ts.Identifier): ts.CallExpression =>
-      factory.createCallExpression(
+    const getFetchNode = (nameIdent: ts.Identifier): ts.CallExpression => {
+      const pathNode = factory.createBinaryExpression(
+        factory.createPropertyAccessExpression(
+          nameIdent,
+          factory.createIdentifier('default'),
+        ),
+        factory.createToken(ts.SyntaxKind.BarBarToken),
+        nameIdent,
+      )
+
+      const url =
+        cfg.target === 'bun'
+          ? factory.createTemplateExpression(
+              factory.createTemplateHead('file://', 'file://'),
+              [
+                factory.createTemplateSpan(
+                  pathNode,
+                  factory.createTemplateTail('', ''),
+                ),
+              ],
+            )
+          : pathNode
+
+      return factory.createCallExpression(
         factory.createIdentifier('fetch'),
         undefined,
-        [
-          factory.createBinaryExpression(
-            factory.createPropertyAccessExpression(
-              nameIdent,
-              factory.createIdentifier('default'),
-            ),
-            factory.createToken(ts.SyntaxKind.BarBarToken),
-            nameIdent,
-          ),
-        ],
+        [url],
       )
+    }
 
     /* Creates the WebAssembly.instantiate call.
      *
@@ -272,11 +292,11 @@ const toCompile = (fname: string) => {
      *   ./foo.js
      */
     const getImports = (wasmImport: string): ModuleImport[] => {
-      log.debug(`getImports`, { fname, wasmImport })
+      log.debug(`getImports`, { fname: cfg.path, wasmImport })
 
       try {
         const mod = new WebAssembly.Module(
-          fs.readFileSync(fs.openSync(resolvePath(fname, wasmImport), 'r')),
+          fs.readFileSync(fs.openSync(resolvePath(cfg.path, wasmImport), 'r')),
         )
 
         const importPaths = WebAssembly.Module.imports(mod).reduce(
@@ -288,10 +308,11 @@ const toCompile = (fname: string) => {
         )
 
         return Array.from(importPaths).map((importPath, i) => {
-          const relativePath =
-            path.dirname(wasmImport) === '.'
-              ? importPath
-              : path.join(path.dirname(wasmImport), importPath)
+          let relativePath = path.join(path.dirname(wasmImport), importPath)
+
+          if (/^\p{L}/u.test(relativePath)) {
+            relativePath = `./${relativePath}`
+          }
 
           const ident = factory.createIdentifier(`__bun_wasm_import_${i}`)
           return {
@@ -301,7 +322,7 @@ const toCompile = (fname: string) => {
           }
         })
       } catch (e) {
-        throw new Error(`failed to compile ${fname}: ${e}`)
+        throw new Error(`failed to compile ${cfg.path}: ${e}`)
       }
     }
 
@@ -340,20 +361,16 @@ const toCompile = (fname: string) => {
 }
 
 // TODO: generate differently based on node vs browser.
-export function transform(
-  sourceText: string,
-  fileName: string,
-  loader: JavaScriptLoader,
-): string {
+export function transform(sourceText: string, cfg: TransformConfig): string {
   const sourceFile = ts.createSourceFile(
-    fileName,
+    cfg.path,
     sourceText,
     ts.ScriptTarget.ESNext,
     true,
-    scriptKindFromLoader(loader),
+    scriptKindFromLoader(cfg.loader),
   )
 
-  const result = ts.transform(sourceFile, [toCompile(fileName)])
+  const result = ts.transform(sourceFile, [toCompile(cfg)])
   if (result.transformed.length === 0) {
     return sourceText
   }
