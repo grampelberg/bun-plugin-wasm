@@ -1,18 +1,16 @@
 import {
   afterAll,
-  beforeAll,
   type CustomMatcher,
   describe,
   expect,
   type MatcherResult,
   test,
 } from 'bun:test'
-import { access, rmdir, stat } from 'node:fs/promises'
+import { rmdir } from 'node:fs/promises'
 import path from 'node:path'
 
-import { $, randomUUIDv7, spawn } from 'bun'
+import { $, randomUUIDv7 } from 'bun'
 import index from 'demo/index'
-import ora from 'ora'
 import puppeteer from 'puppeteer'
 
 import wasmPlugin from './lib.ts'
@@ -23,9 +21,47 @@ import { log } from './log.ts'
 import './__fixtures__/import.ts' with { type: 'file' }
 import 'demo/index' with { type: 'file' }
 
-const WASM_PATH = './rust'
 const ARTIFACT_DIR = './test'
 const FIXTURES_DIR = './src/__fixtures__'
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null
+
+const valueEndsWith: CustomMatcher<unknown, [string, string]> = function (
+  actual: unknown,
+  key: string,
+  ending: string,
+): MatcherResult {
+  if (!Array.isArray(actual)) {
+    return {
+      message: () =>
+        `expected ${this.utils.printExpected(key)} to be present on an array but received ${this.utils.printReceived(actual)}`,
+      pass: false,
+    }
+  }
+
+  for (const item of actual) {
+    if (!isRecord(item)) continue
+
+    const value = item[key]
+
+    if (typeof value === 'string' && value.endsWith(ending)) {
+      return {
+        message: () => `did not expect ${this.utils.printExpected(key)}
+          to have a value ending with ${this.utils.printExpected(ending)}
+          in ${this.utils.printReceived(item)}`,
+        pass: true,
+      }
+    }
+  }
+
+  return {
+    message: () => `expected ${this.utils.printExpected(key)}
+      to have a value ending with ${this.utils.printExpected(ending)}
+      in ${this.utils.printReceived(actual)}`,
+    pass: false,
+  }
+}
 
 // Verifies that the build correctly rewrites and includes WASM as an asset
 test('build', async () => {
@@ -35,31 +71,7 @@ test('build', async () => {
 
   log.debug('run id:', key)
 
-  expect.extend({
-    valueEndsWith(
-      actual: Array<Object>,
-      key: string,
-      ending: string,
-    ): MatcherResult {
-      for (const item of actual) {
-        if (key in item && item[key].endsWith(ending)) {
-          return {
-            message: () => `did not expect ${this.utils.printExpected(key)}
-              to have a value ending with ${this.utils.printExpected(ending)}
-              in ${this.utils.printReceived(item)}`,
-            pass: true,
-          }
-        }
-      }
-
-      return {
-        message: () => `expected ${this.utils.printExpected(key)}
-          to have a value ending with ${this.utils.printExpected(ending)}
-          in ${this.utils.printReceived(actual)}`,
-        pass: false,
-      }
-    },
-  })
+  expect.extend({ valueEndsWith })
 
   describe.each(targets)('target: %s', async target => {
     describe.each(entrypoints)('path: %s', async entrypoint => {
@@ -79,7 +91,9 @@ test('build', async () => {
 
       const entry = result.outputs.find(o => o.kind === 'entry-point')
 
-      expect(entry).toBeDefined()
+      if (!entry) {
+        throw new Error('entrypoint path not found in build result')
+      }
 
       const content = await Bun.file(entry.path).text()
 
@@ -110,7 +124,14 @@ test('[slow] serve', async () => {
   const hmr = [false, true]
 
   describe.each(hmr)(`hmr: %s`, async hmr => {
-    const browser = await puppeteer.launch()
+    const launchOptions =
+      process.env.GITHUB_ACTIONS === 'true'
+        ? {
+            args: ['--no-sandbox', '--disable-setuid-sandbox'],
+          }
+        : {}
+
+    const browser = await puppeteer.launch(launchOptions)
     const page = await browser.newPage()
     const port = randomPort()
 

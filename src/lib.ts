@@ -48,7 +48,10 @@ const wasmPlugin: BunPlugin = {
 
         if (imps.find(i => i.path.endsWith('.wasm'))) {
           const contents = transform(result.contents, {
-            target: build.target,
+            // When `bun run` is used, the target doesn't get set, but we can
+            // assume that it is `bun`. All the browser examples appear to
+            // correctly set the config object.
+            target: build.config?.target || 'bun',
             path: fname,
             loader: result.loader,
           })
