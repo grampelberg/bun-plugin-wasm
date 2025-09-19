@@ -1,7 +1,10 @@
 {
   "name": "@grampelberg/bun-plugin-wasm",
-  "version": "0.1.0",
-  "workspaces": ["demo", "rust/pkg"],
+  "version": "0.1.1",
+  "workspaces": [
+    "demo",
+    "rust/pkg"
+  ],
   "module": "src/lib.ts",
   "scripts": {
     "dep:check": "depcheck",
