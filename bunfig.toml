@@ -1,3 +1,6 @@
+# This has the unfortunate effect of always trying to run the plugin.
+# Unfortunately, Bun's --config option does not work with the bunfig file being
+# in the __fixtures__ directory.
 preload = ["./src/lib.ts"]
 
 [serve.static]

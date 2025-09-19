@@ -15,44 +15,22 @@ import index from 'demo/index'
 import ora from 'ora'
 import puppeteer from 'puppeteer'
 
-// This is to make sure --watch restarts when edits happen to the entrypoint
-// import '../index.ts'
-
 import wasmPlugin from './lib.ts'
 import { log } from './log.ts'
 
+// These import adds the runtime file to test's watch list but loads it as an
+// asset (aka file) so that there's nothing funny going on.
+import './__fixtures__/import.ts' with { type: 'file' }
+import 'demo/index' with { type: 'file' }
+
 const WASM_PATH = './rust'
 const ARTIFACT_DIR = './test'
-
-beforeAll(async () => {
-  const spinner = ora('Building WASM').start()
-
-  if (await stat(path.join(WASM_PATH, 'pkg'))) {
-    spinner.warn('WASM build skipped, already exists')
-
-    return
-  }
-
-  const proc = spawn(['wasm-pack', 'build'], {
-    cwd: WASM_PATH,
-    stderr: 'pipe',
-  })
-
-  await proc.exited
-  const stderr = `\n${await proc.stderr.text()}`
-  if (proc.exitCode !== 0) {
-    spinner.fail('Failed to build WASM')
-    log.error(stderr)
-    throw new Error('Failed to build WASM')
-  }
-
-  spinner.succeed(`WASM compiled`)
-  log.debug('compilation', stderr)
-})
+const FIXTURES_DIR = './src/__fixtures__'
 
 // Verifies that the build correctly rewrites and includes WASM as an asset
 test('build', async () => {
   const targets = ['browser', 'node']
+  const entrypoints = ['import.ts', 'relative.ts']
   const key = randomUUIDv7()
 
   log.debug('run id:', key)
@@ -84,39 +62,43 @@ test('build', async () => {
   })
 
   describe.each(targets)('target: %s', async target => {
-    const result = await Bun.build({
-      entrypoints: ['./index.ts'],
-      // TODO: this should probably be on a per-test run basis
-      outdir: path.join(ARTIFACT_DIR, key, target),
-      // target: target as Target,
-      plugins: [wasmPlugin],
+    describe.each(entrypoints)('path: %s', async entrypoint => {
+      const result = await Bun.build({
+        entrypoints: [path.join(FIXTURES_DIR, entrypoint)],
+        // TODO: this should probably be on a per-test run basis
+        outdir: path.join(ARTIFACT_DIR, key, target),
+        // target: target as Target,
+        plugins: [wasmPlugin],
+      })
+
+      expect(result.success).toBe(true)
+
+      expect(result.logs).toBeEmpty()
+
+      expect(result.outputs).valueEndsWith('path', '.wasm')
+
+      const entry = result.outputs.find(o => o.kind === 'entry-point')
+
+      expect(entry).toBeDefined()
+
+      const content = await Bun.file(entry.path).text()
+
+      try {
+        expect(content).toContain('WebAssembly.instantiateStreaming')
+      } catch {
+        throw new Error(
+          `couldn't find WebAssembly.instantiateStreaming in the output, see file for full output:\n\t${entry.path}`,
+        )
+      }
     })
 
-    expect(result.success).toBe(true)
-
-    expect(result.logs).toBeEmpty()
-
-    expect(result.outputs).valueEndsWith('path', '.wasm')
-
-    const entry = result.outputs.find(o => o.kind === 'entry-point')
-
-    expect(entry).toBeDefined()
-
-    const content = await Bun.file(entry.path).text()
-
-    // console.log(content)
-
-    try {
-      expect(content).toContain('WebAssembly.instantiateStreaming')
-    } catch {
-      throw new Error(
-        `couldn't find WebAssembly.instantiateStreaming in the output, see file for full output:\n\t${entry.path}`,
-      )
-    }
-  })
-
-  afterAll(async () => {
-    await rmdir(path.join(ARTIFACT_DIR, key), { recursive: true })
+    afterAll(async () => {
+      try {
+        await rmdir(path.join(ARTIFACT_DIR, key), { recursive: true })
+      } catch {
+        log.debug('asset directory cleanup failed, continuing')
+      }
+    })
   })
 })
 
@@ -171,16 +153,36 @@ test('[slow] serve', async () => {
   })
 })
 
+const header = (msg: string): string => {
+  const width = 80
+
+  const totalPadding = width - msg.length
+  const left = Math.floor(totalPadding / 2)
+  const right = totalPadding - left
+
+  return `${'='.repeat(left)} ${msg} ${'='.repeat(right)}\n`
+}
+
+const debugSection = (name: string, ...args: string[]): void => {
+  log.debug('\n', header(name), ...args)
+}
+
 test('[slow] run', async () => {
-  const { exitCode, stdout, stderr } = await $`bun run index.ts`
-    .nothrow()
-    .quiet()
+  if ('LOG_LEVEL' in process.env) {
+    $.env({ LOG_LEVEL: process.env.LOG_LEVEL })
+  }
+
+  const { exitCode, stdout, stderr } =
+    await $`bun run ${path.join(FIXTURES_DIR, 'import.ts')}`.nothrow().quiet()
+
+  debugSection('stdout', stdout.toString())
+  debugSection('stderr', stderr.toString())
 
   try {
     expect(exitCode).toBe(0)
   } catch {
-    throw new Error(
-      `process exited ${exitCode}, stderr:\n${stderr}\n, stdout:\n${stdout}`,
-    )
+    throw new Error(`process exited ${exitCode}`)
   }
+
+  expect(stdout.toString()).toContain('.....test complete.....')
 })

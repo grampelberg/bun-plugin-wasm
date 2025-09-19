@@ -1,2 +1,4 @@
 [tools]
 bun = "latest"
+"cargo:wasm-pack" = "latest"
+just = "latest"

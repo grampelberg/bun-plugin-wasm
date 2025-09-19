@@ -1,2 +1,2 @@
 [serve.static]
-plugins = ["../src/lib.ts"]
+plugins = ["@grampelberg/bun-plugin-wasm"]

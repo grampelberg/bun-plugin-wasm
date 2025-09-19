@@ -73,21 +73,24 @@ There are handlers to allow for loading WASM in
 
 ## Development
 
+There are some extra things that need to be done. To get this working, first
+install [mise](https://mise.jdx.dev) and run:
+
+```bash
+mise install
+```
+
+Then, you'll want to run:
+
+```bash
+just install
+```
+
+This will do some install/compilation that is needed to run the tests.
+
 - All logging is controlled via `LOG_LEVEL`.
 
 ## TODO
 
-- [x] Pull `demo/rust` in as a package for the test
-- [ ] Get the node version working
 - [ ] Put the GHA scaffolding in place
 - [ ] Add release workflow
-- [ ] Add index.ts to test watchlist
-  - [ ] Add demo/src/index.ts to test watchlist (the server reloads, but tests
-        don't rerun).
-- [ ] Move index.ts to somewhere else, maybe a test assets folder?
-- [ ] Why does `import ./rust/pkg/bun_Wasm_demo_bg.js` not work?
-- [ ] Add test case to verify that relative paths are in all rewritten rules
-      (`./foo_bg.js`)
-- [ ] Add test case that handles `../`, `./` and `/` paths. Does there need to
-      be a case for module imports as well?
-- [ ] Include `LOG_LEVEL` setting from the test runner in the `bun run` call
