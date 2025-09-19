@@ -1,11 +1,36 @@
 {
   "name": "@grampelberg/bun-plugin-wasm",
-  "version": "0.1.1",
-  "workspaces": [
-    "demo",
-    "rust/pkg"
-  ],
-  "module": "src/lib.ts",
+  "version": "0.1.2",
+  "description": "Bun plugin for loading wasm-pack WebAssembly modules in Bun projects",
+  "type": "module",
+  "main": "./src/lib.ts",
+  "module": "./src/lib.ts",
+  "exports": {
+    ".": {
+      "default": "./src/lib.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": ["src"],
+  "keywords": ["bun", "plugin", "webassembly", "wasm"],
+  "homepage": "https://github.com/grampelberg/bun-plugin-wasm#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/grampelberg/bun-plugin-wasm.git"
+  },
+  "bugs": {
+    "url": "https://github.com/grampelberg/bun-plugin-wasm/issues"
+  },
+  "license": "MIT",
+  "author": "Thomas Rampelberg (https://github.com/grampelberg)",
+  "engines": {
+    "bun": ">=1.2.20"
+  },
+  "packageManager": "bun@1.2.22",
+  "publishConfig": {
+    "access": "public"
+  },
+  "workspaces": ["demo", "rust/pkg"],
   "scripts": {
     "dep:check": "depcheck",
     "format:check": "biome format && just --fmt --unstable --check",

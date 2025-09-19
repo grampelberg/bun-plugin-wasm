@@ -92,7 +92,6 @@ This will do some install/compilation that is needed to run the tests.
 
 ## Release
 
-## TODO
-
-- [ ] Put the GHA scaffolding in place
-- [ ] Add release workflow
+```bash
+just release
+```
