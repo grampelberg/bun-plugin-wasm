@@ -99,6 +99,8 @@ just release
 ## TODO
 
 - [ ] Add a test that verifies tailwind actually got bundled
+- [ ] Figure out the release process. `npm publish` requires pushing to default,
+      which I've disabled. It also formats package.json wrong.
 
 ## Bugs
 
