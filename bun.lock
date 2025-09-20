@@ -10,8 +10,6 @@
         "@biomejs/biome": "2.2.4",
         "@types/bun": "latest",
         "bun-plugin-tailwind": "^0.0.15",
-        "bun-wasm-demo": "workspace:*",
-        "demo": "workspace:*",
         "depcheck": "^1.4.7",
         "puppeteer": "^24.22.0",
         "typescript": "^5.9.2",
