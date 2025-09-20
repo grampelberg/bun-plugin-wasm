@@ -1,9 +1,4 @@
 {
-  "inlay_hints": {
-    "toggle_on_modifiers_press": {
-      "alt": true
-    }
-  },
   "languages": {
     "JavaScript": {
       "formatter": { "language_server": { "name": "biome" } },
