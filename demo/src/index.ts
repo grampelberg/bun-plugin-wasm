@@ -1,3 +1,5 @@
-import * as stuff from '../../rust/pkg/bun_wasm_demo.js'
+import { add } from 'bun-wasm-demo'
 
-console.log(stuff.add(1, 2))
+import './index.css'
+
+console.log(add(1, 2))

@@ -1,7 +1,9 @@
-# This has the unfortunate effect of always trying to run the plugin.
-# Unfortunately, Bun's --config option does not work with the bunfig file being
-# in the __fixtures__ directory.
-preload = ["./src/lib.ts"]
+# Bun's --config option does not work the way you'd think it does. This should
+# go in the __fixtures__ directory when that's supported.
+preload = ["./src/preload.ts"]
 
+# This is another unfortunate effect of Bun's current plugin system. The
+# `Bun.serve` calls in `lib.test.ts` use *this* bunfig.toml and not the one in
+# `demo`.
 [serve.static]
-plugins = ["./src/lib.ts"]
+plugins = ["./src/lib.ts", "bun-plugin-tailwind"]

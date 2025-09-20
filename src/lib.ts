@@ -1,7 +1,12 @@
 import path from 'node:path'
 
-import type { BunPlugin, PluginBuilder, TranspilerOptions } from 'bun'
-import { type OnLoadArgs, plugin, Transpiler } from 'bun'
+import type {
+  BunPlugin,
+  OnLoadArgs,
+  PluginBuilder,
+  TranspilerOptions,
+} from 'bun'
+import { Transpiler } from 'bun'
 import { createPatch } from 'diff'
 import type { ILogObj, Logger } from 'tslog'
 
@@ -38,41 +43,40 @@ const wasmPlugin: BunPlugin = {
         }
 
         if (!isJavaScriptLoader(result.loader)) {
-          return result
+          return build.config?.target === 'browser' ? undefined : result
         }
 
-        // TODO: gate this on ESM only.
         const imps = new Transpiler({ loader: result.loader }).scanImports(
           result.contents,
         )
 
-        if (imps.find(i => i.path.endsWith('.wasm'))) {
-          const contents = transform(result.contents, {
-            // When `bun run` is used, the target doesn't get set, but we can
-            // assume that it is `bun`. All the browser examples appear to
-            // correctly set the config object.
-            target: build.config?.target || 'bun',
-            path: fname,
-            loader: result.loader,
-          })
-
-          if (log.settings.minLevel <= (levelMap.debug || 0)) {
-            log.debug(
-              'transformed',
-              '\n',
-              createPatch(fname, result.contents, contents),
-            )
-          }
-
-          result.contents = contents
+        if (!imps.find(i => i.path.endsWith('.wasm'))) {
+          return build.config?.target === 'browser' ? undefined : result
         }
+
+        const contents = transform(result.contents, {
+          // When `bun run` is used, the target doesn't get set, but we can
+          // assume that it is `bun`. All the browser examples appear to
+          // correctly set the config object.
+          target: build.config?.target || 'bun',
+          path: fname,
+          loader: result.loader,
+        })
+
+        if (log.settings.minLevel <= (levelMap.debug || 0)) {
+          log.debug(
+            'transformed',
+            '\n',
+            createPatch(fname, result.contents, contents),
+          )
+        }
+
+        result.contents = contents
 
         return result
       },
     )
   },
 }
-
-plugin(wasmPlugin)
 
 export default wasmPlugin

@@ -1,21 +1,18 @@
-import { type Server, serve } from 'bun'
+import type { Server } from 'bun'
 
 import index from './index.html'
 
-const server: Server = serve({
-  routes: {
-    // Serve index.html for all unmatched routes.
-    '/*': index,
-  },
+export const serve = (port: number = 3000, hmr: boolean = true): Server => {
+  return Bun.serve({
+    port,
+    routes: {
+      '/*': index,
+    },
 
-  development: process.env.NODE_ENV !== 'production' && {
-    // Enable browser hot reloading in development
-    hmr: true,
+    development: {
+      hmr,
 
-    // Echo console logs from the browser to the server
-    console: true,
-  },
-})
-
-// eslint-disable-next-line no-console -- Server startup message needed for development
-console.log(`🚀 Server running at ${server.url}`)
+      console: true,
+    },
+  })
+}

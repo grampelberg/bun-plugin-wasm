@@ -1,6 +1,9 @@
 {
   "ignores": [
     "bun",
-    "bun:test"
+    "bun:test",
+    "demo",
+    "bun-wasm-demo",
+    "bun-plugin-tailwind",
   ]
 }

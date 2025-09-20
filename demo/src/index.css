@@ -1,0 +1,4 @@
+@import "tailwindcss";
+
+/* biome-ignore lint/suspicious/noUnknownAtRules: Tailwind uses @plugin to load extensions */
+@plugin "tailwindcss-animate";
