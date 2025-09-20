@@ -10,7 +10,8 @@ import { rmdir } from 'node:fs/promises'
 import path from 'node:path'
 
 import { $, randomUUIDv7 } from 'bun'
-import index from 'demo/index'
+// biome-ignore lint/correctness/noUndeclaredDependencies: workspace dependency
+import { serve } from 'demo'
 import puppeteer from 'puppeteer'
 
 import wasmPlugin from './lib.ts'
@@ -19,7 +20,8 @@ import { log } from './log.ts'
 // These import adds the runtime file to test's watch list but loads it as an
 // asset (aka file) so that there's nothing funny going on.
 import './__fixtures__/import.ts' with { type: 'file' }
-import 'demo/index' with { type: 'file' }
+import '../demo/src/index.ts' with { type: 'file' }
+import '../bunfig.toml' with { type: 'file' }
 
 const ARTIFACT_DIR = './test'
 const FIXTURES_DIR = './src/__fixtures__'
@@ -159,16 +161,7 @@ test('[slow] serve', async () => {
 
     // Note: you need the serve.static configuration in bunfig.toml to pick up
     // the plugin.
-    Bun.serve({
-      port,
-      routes: {
-        '/*': index,
-      },
-      development: {
-        hmr,
-        console: true,
-      },
-    })
+    const server = serve(port, hmr)
 
     const errors: Array<Error> = []
 
@@ -176,8 +169,12 @@ test('[slow] serve', async () => {
       errors.push(error)
     })
 
+    page.on('error', error => {
+      errors.push(error)
+    })
+
     page.on('console', msg => {
-      log.debug(`console.${msg.type()}`, msg.text(), msg.args())
+      log.debug(`console.${msg.type()}(${msg.text()})`)
 
       if (msg.type() !== 'error') return
 
@@ -191,6 +188,7 @@ test('[slow] serve', async () => {
     await page.goto(`http://localhost:${port}`)
 
     await browser.close()
+    await server.stop()
 
     expect(errors).toBeEmpty()
   })

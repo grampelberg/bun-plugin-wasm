@@ -3,13 +3,18 @@
   "type": "module",
   "private": true,
   "exports": {
+    ".": "./src/serve.ts",
     "./index": "./src/index.html"
   },
   "scripts": {
-    "dev": "bun --watch src/serve.ts"
+    "dev": "bun --watch src/run.ts"
   },
   "dependencies": {
-    "@grampelberg/bun-plugin-wasm": "file:.."
+    "@grampelberg/bun-plugin-wasm": "file:..",
+    "bun-plugin-tailwind": "latest",
+    "bun-wasm-demo": "file:../rust/pkg",
+    "tailwindcss": "^4.1.13",
+    "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
     "@types/bun": "latest"

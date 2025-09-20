@@ -30,7 +30,7 @@ Bun.build({
 To use `bun run`, edit `bunfig.toml` to include:
 
 ```toml
-preload = ["@grampelberg/bun-plugin-wasm"]
+preload = ["@grampelberg/bun-plugin-wasm/preload"]
 ```
 
 ## How does it work?
@@ -95,3 +95,19 @@ This will do some install/compilation that is needed to run the tests.
 ```bash
 just release
 ```
+
+## TODO
+
+- [ ] Add a test that verifies tailwind actually got bundled
+
+## Bugs
+
+- [ ] `Bun.plugin()` introduces issues with `bun-plugin-tailwind`.
+- [ ] `onResolve` doesn't appear to work with used with `preload`.
+- [ ] `onResolve` for runtimes requires a path to be returned, it does not for
+      bundles.
+- [ ] `onLoad` for runtimes requires a `contents` to be returned, it does not
+      for bundles.
+- [ ] When using `hmr`, you cannot also use `onResolve`. It fails initially
+      because `react-refresh` is not found (aka not in node_modules). There's
+      still an issue, however.

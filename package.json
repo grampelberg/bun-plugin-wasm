@@ -9,6 +9,9 @@
     ".": {
       "default": "./src/lib.ts"
     },
+    "./preload": {
+      "default": "./src/preload.ts"
+    },
     "./package.json": "./package.json"
   },
   "files": ["src"],
@@ -43,11 +46,10 @@
   "devDependencies": {
     "@biomejs/biome": "2.2.4",
     "@types/bun": "latest",
+    "bun-plugin-tailwind": "^0.0.15",
     "depcheck": "^1.4.7",
     "puppeteer": "^24.22.0",
-    "typescript": "^5.9.2",
-    "demo": "workspace:*",
-    "bun-wasm-demo": "workspace:*"
+    "typescript": "^5.9.2"
   },
   "dependencies": {
     "diff": "^8.0.2",

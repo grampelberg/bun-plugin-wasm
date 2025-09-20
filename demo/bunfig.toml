@@ -1,2 +1,2 @@
 [serve.static]
-plugins = ["@grampelberg/bun-plugin-wasm"]
+plugins = ["bun-plugin-tailwind", "@grampelberg/bun-plugin-wasm"]
