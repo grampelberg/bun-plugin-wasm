@@ -8,14 +8,14 @@ Plugin that enables loading `wasm-pack` packages in Bun. Check out the
 Add the package to your project:
 
 ```sh
-bun add -d @grampelberg/bun-web-wasm
+bun add @grampelberg/bun-plugin-wasm
 ```
 
 Then, for the dev server, edit `bunfig.toml` to include:
 
 ```toml
 [serve.static]
-plugins = ["@grampelberg/bun-web-wasm"]
+plugins = ["@grampelberg/bun-plugin-wasm"]
 ```
 
 For builds:
@@ -23,14 +23,14 @@ For builds:
 ```ts
 Bun.build({
   ...
-  plugins: ["@grampelberg/bun-web-wasm"],
+  plugins: ["@grampelberg/bun-plugin-wasm"],
 })
 ```
 
 To use `bun run`, edit `bunfig.toml` to include:
 
 ```toml
-preload = ["@grampelberg/bun-web-wasm"]
+preload = ["@grampelberg/bun-plugin-wasm"]
 ```
 
 ## How does it work?

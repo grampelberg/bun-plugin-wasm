@@ -11,15 +11,8 @@
     },
     "./package.json": "./package.json"
   },
-  "files": [
-    "src"
-  ],
-  "keywords": [
-    "bun",
-    "plugin",
-    "webassembly",
-    "wasm"
-  ],
+  "files": ["src"],
+  "keywords": ["bun", "plugin", "webassembly", "wasm"],
   "homepage": "https://github.com/grampelberg/bun-plugin-wasm#readme",
   "repository": {
     "type": "git",
@@ -37,10 +30,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "workspaces": [
-    "demo",
-    "rust/pkg"
-  ],
+  "workspaces": ["demo", "rust/pkg"],
   "scripts": {
     "dep:check": "depcheck",
     "format:check": "biome format && just --fmt --unstable --check",
