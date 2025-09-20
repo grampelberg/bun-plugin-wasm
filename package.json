@@ -1,9 +1,39 @@
 {
   "name": "@grampelberg/bun-plugin-wasm",
+  "version": "0.1.2",
+  "description": "Bun plugin for loading wasm-pack WebAssembly modules in Bun projects",
+  "type": "module",
+  "main": "./src/lib.ts",
+  "module": "./src/lib.ts",
+  "exports": {
+    ".": {
+      "default": "./src/lib.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": ["src"],
+  "keywords": ["bun", "plugin", "webassembly", "wasm"],
+  "homepage": "https://github.com/grampelberg/bun-plugin-wasm#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/grampelberg/bun-plugin-wasm.git"
+  },
+  "bugs": {
+    "url": "https://github.com/grampelberg/bun-plugin-wasm/issues"
+  },
+  "license": "MIT",
+  "author": "Thomas Rampelberg (https://github.com/grampelberg)",
+  "engines": {
+    "bun": ">=1.2.20"
+  },
+  "packageManager": "bun@1.2.22",
+  "publishConfig": {
+    "access": "public"
+  },
   "workspaces": ["demo", "rust/pkg"],
-  "module": "src/lib.ts",
   "scripts": {
-    "format:check": "biome format",
+    "dep:check": "depcheck",
+    "format:check": "biome format && just --fmt --unstable --check",
     "lint:check": "biome lint --error-on-warnings && tsc --noEmit",
     "lint:fix": "biome lint --fix --error-on-warnings",
     "test": "bun test",
@@ -11,27 +41,16 @@
     "test:fast": "bun test --watch -t '^(?!.*slow).*'"
   },
   "devDependencies": {
-    "@babel/plugin-proposal-import-wasm-source": "^7.27.1",
     "@biomejs/biome": "2.2.4",
-    "@eslint/js": "^9.35.0",
-    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
-    "@types/babel-core": "^6.25.10",
-    "@types/babel-types": "^7.0.16",
     "@types/bun": "latest",
-    "eslint": "^9.35.0",
-    "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-unicorn": "^61.0.2",
-    "ora": "^8.2.0",
+    "depcheck": "^1.4.7",
     "puppeteer": "^24.22.0",
-    "typescript": "^5.9.2",
-    "typescript-eslint": "^8.43.0"
+    "typescript": "^5.9.2"
   },
   "dependencies": {
-    "@babel/core": "^7.28.4",
-    "@types/babel-traverse": "^6.25.10",
     "demo": "workspace:*",
+    "bun-wasm-demo": "workspace:*",
     "diff": "^8.0.2",
-    "tslog": "^4.9.3",
-    "zod": "^4.1.9"
+    "tslog": "^4.9.3"
   }
 }

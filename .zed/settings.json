@@ -38,6 +38,15 @@
         }
       },
       "format_on_save": "on"
+    },
+    "Just": {
+      "formatter": {
+        "external": {
+          "command": "just",
+          "arguments": ["--dump"]
+        }
+      },
+      "format_on_save": "on"
     }
   }
 }

@@ -90,7 +90,8 @@ This will do some install/compilation that is needed to run the tests.
 
 - All logging is controlled via `LOG_LEVEL`.
 
-## TODO
+## Release
 
-- [ ] Put the GHA scaffolding in place
-- [ ] Add release workflow
+```bash
+just release
+```

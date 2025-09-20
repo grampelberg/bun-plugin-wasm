@@ -2,8 +2,6 @@ import path from 'node:path'
 
 import type { BuildOutput } from 'bun'
 
-import { wasmPlugin } from './plugin/main.ts'
-
 type OutputTableRow = {
   File: string
   Type: string

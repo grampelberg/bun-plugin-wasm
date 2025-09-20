@@ -1,13 +1,13 @@
 import fs from 'node:fs'
 import path from 'node:path'
 
-import type { TranspilerOptions } from 'bun'
+import type { Target, TranspilerOptions } from 'bun'
 import * as ts from 'typescript'
 
 import { log } from './log.ts'
 
 type TransformConfig = {
-  target: 'browser' | 'bun'
+  target?: Target
   path: string
   loader: JavaScriptLoader
 }
@@ -327,15 +327,22 @@ const toCompile = (cfg: TransformConfig) => {
     }
 
     // TODO: this needs to use import.meta.resolve instead of the double step
-    const visit: ts.Visitor = (node: ts.Node): ts.Node => {
-      if (
-        !ts.isImportDeclaration(node) ||
-        (ts.isStringLiteral(node.moduleSpecifier) &&
-          // TODO: update this to a type check for WASM
-          !node.moduleSpecifier.text.endsWith('.wasm')) ||
-        node.importClause?.phaseModifier
-      )
+    const visit: ts.Visitor = (node: ts.Node): ts.VisitResult<ts.Node> => {
+      if (!ts.isImportDeclaration(node)) {
         return ts.visitEachChild(node, visit, ctx)
+      }
+
+      if (!ts.isStringLiteral(node.moduleSpecifier)) {
+        return ts.visitEachChild(node, visit, ctx)
+      }
+
+      if (
+        // TODO: update this to a type check for WASM
+        !node.moduleSpecifier.text.endsWith('.wasm') ||
+        node.importClause?.phaseModifier
+      ) {
+        return ts.visitEachChild(node, visit, ctx)
+      }
 
       const varName = getVarName(node)
 
@@ -356,7 +363,8 @@ const toCompile = (cfg: TransformConfig) => {
       return [...modImports.map(m => m.node), importNode, localVar]
     }
 
-    return (node: ts.Node): ts.Node => ts.visitEachChild(node, visit, ctx)
+    return (node: ts.SourceFile): ts.SourceFile =>
+      ts.visitEachChild(node, visit, ctx)
   }
 }
 
