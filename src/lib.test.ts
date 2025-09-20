@@ -119,6 +119,28 @@ test('build', async () => {
 const randomPort = (): number =>
   Math.floor(Math.random() * (65535 - 49152 + 1) + 49152)
 
+const isPortAvailable = async (port: number): Promise<boolean> => {
+  const { exitCode } = await $`nc -z -w 1 127.0.0.1 ${port}`.nothrow().quiet()
+
+  if (exitCode === 127) {
+    throw new Error('nc command not found; install netcat to run serve test')
+  }
+
+  return exitCode !== 0
+}
+
+const findOpenPort = async (maxAttempts: number = 10): Promise<number> => {
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const port = randomPort()
+
+    if (await isPortAvailable(port)) {
+      return port
+    }
+  }
+
+  throw new Error('could not find an open port')
+}
+
 // Verifies that the demo "works", aka it doesn't htrow an error when loading
 test('[slow] serve', async () => {
   const hmr = [false, true]
@@ -133,7 +155,7 @@ test('[slow] serve', async () => {
 
     const browser = await puppeteer.launch(launchOptions)
     const page = await browser.newPage()
-    const port = randomPort()
+    const port = await findOpenPort()
 
     // Note: you need the serve.static configuration in bunfig.toml to pick up
     // the plugin.
