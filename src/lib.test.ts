@@ -6,10 +6,12 @@ import {
   type MatcherResult,
   test,
 } from 'bun:test'
+import fs from 'node:fs'
 import { rmdir } from 'node:fs/promises'
 import path from 'node:path'
 
-import { $, randomUUIDv7 } from 'bun'
+import { $, type BuildArtifact, randomUUIDv7 } from 'bun'
+import tailwindPlugin from 'bun-plugin-tailwind'
 // biome-ignore lint/correctness/noUndeclaredDependencies: workspace dependency
 import { serve } from 'demo'
 import puppeteer from 'puppeteer'
@@ -65,6 +67,41 @@ const valueEndsWith: CustomMatcher<unknown, [string, string]> = function (
   }
 }
 
+type AssetMatcher = (content: string) => boolean
+
+const hasAsset: CustomMatcher<unknown, [string, AssetMatcher]> = (
+  actual: unknown,
+  ext: string,
+  matcher: AssetMatcher,
+): MatcherResult => {
+  const build = actual as BuildArtifact[]
+
+  const artifact = build.find(o => o.path.endsWith(ext))
+
+  if (!artifact) {
+    return {
+      message: () => `${ext} not found in build outputs:
+\t${build.map(o => o.path).join('\n\t')}`,
+      pass: false,
+    }
+  }
+
+  const content = fs.readFileSync(artifact.path, 'utf8')
+
+  if (!matcher(content)) {
+    return {
+      message: () =>
+        `${matcher.toString()} failed to match for ${artifact.path}`,
+      pass: false,
+    }
+  }
+
+  return {
+    message: () => `${matcher.toString()} matched for ${artifact.path}`,
+    pass: true,
+  }
+}
+
 // Verifies that the build correctly rewrites and includes WASM as an asset
 test('build', async () => {
   const targets = ['browser', 'node']
@@ -73,16 +110,17 @@ test('build', async () => {
 
   log.debug('run id:', key)
 
-  expect.extend({ valueEndsWith })
+  expect.extend({ hasAsset, valueEndsWith })
 
   describe.each(targets)('target: %s', async target => {
-    describe.each(entrypoints)('path: %s', async entrypoint => {
+    describe.each(entrypoints)('path: %s', async () => {
       const result = await Bun.build({
-        entrypoints: [path.join(FIXTURES_DIR, entrypoint)],
+        entrypoints: ['./demo/src/index.html'],
+        // entrypoints: [path.join(FIXTURES_DIR, entrypoint)],
         // TODO: this should probably be on a per-test run basis
         outdir: path.join(ARTIFACT_DIR, key, target),
         // target: target as Target,
-        plugins: [wasmPlugin],
+        plugins: [wasmPlugin, tailwindPlugin],
       })
 
       expect(result.success).toBe(true)
@@ -91,21 +129,16 @@ test('build', async () => {
 
       expect(result.outputs).valueEndsWith('path', '.wasm')
 
-      const entry = result.outputs.find(o => o.kind === 'entry-point')
+      // Verify that the entrypoint has been rewritten to include the
+      // instantiate call
+      expect(result.outputs).hasAsset('.js', c =>
+        c.includes('WebAssembly.instantiateStreaming'),
+      )
 
-      if (!entry) {
-        throw new Error('entrypoint path not found in build result')
-      }
-
-      const content = await Bun.file(entry.path).text()
-
-      try {
-        expect(content).toContain('WebAssembly.instantiateStreaming')
-      } catch {
-        throw new Error(
-          `couldn't find WebAssembly.instantiateStreaming in the output, see file for full output:\n\t${entry.path}`,
-        )
-      }
+      // Verify that the tailwind plugin correctly ran
+      expect(result.outputs).hasAsset('.css', c =>
+        c.includes('node_modules/tailwindcss/index.css'),
+      )
     })
 
     afterAll(async () => {

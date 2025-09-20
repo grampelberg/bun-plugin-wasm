@@ -1,10 +1,9 @@
 declare module 'bun:test' {
-  interface Matchers<T = unknown> {
-    valueEndsWith(key: string, ending: string): T
-  }
+  type AssetMatcher = (content: string) => boolean
 
-  interface AsymmetricMatchers {
-    valueEndsWith(key: string, ending: string): unknown
+  interface Matchers<T = unknown> {
+    hasAsset(ext: string, matcher: AssetMatcher): T
+    valueEndsWith(key: string, ending: string): T
   }
 }
 
