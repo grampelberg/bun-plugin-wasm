@@ -92,24 +92,13 @@ This will do some install/compilation that is needed to run the tests.
 
 ## Release
 
-```bash
-just release
-```
+Trigger the [release]() workflow.
 
 ## TODO
 
-- [ ] Add a test that verifies tailwind actually got bundled
 - [ ] Figure out the release process. `npm publish` requires pushing to default,
       which I've disabled. It also formats package.json wrong.
-
-## Bugs
-
-- [ ] `Bun.plugin()` introduces issues with `bun-plugin-tailwind`.
-- [ ] `onResolve` doesn't appear to work with used with `preload`.
-- [ ] `onResolve` for runtimes requires a path to be returned, it does not for
-      bundles.
-- [ ] `onLoad` for runtimes requires a `contents` to be returned, it does not
-      for bundles.
-- [ ] When using `hmr`, you cannot also use `onResolve`. It fails initially
-      because `react-refresh` is not found (aka not in node_modules). There's
-      still an issue, however.
+- [ ] Add `bun audit` to the CI checks. Should this be run on a schedule
+      instead? What's the overlap with dependabot?
+- [ ] Add [renovate](https://docs.renovatebot.com) to the repo ... somehow. CI
+      check maybe?
