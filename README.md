@@ -96,8 +96,6 @@ Trigger the [release]() workflow.
 
 ## TODO
 
-- [ ] Figure out the release process. `npm publish` requires pushing to default,
-      which I've disabled. It also formats package.json wrong.
 - [ ] Add `bun audit` to the CI checks. Should this be run on a schedule
       instead? What's the overlap with dependabot?
 - [ ] Add [renovate](https://docs.renovatebot.com) to the repo ... somehow. CI
