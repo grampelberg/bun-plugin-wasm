@@ -51,6 +51,7 @@ const wasmPlugin: BunPlugin = {
         )
 
         if (!imps.find(i => i.path.endsWith('.wasm'))) {
+          // See https://github.com/oven-sh/bun/issues/22839 for more details
           return build.config?.target === 'browser' ? undefined : result
         }
 

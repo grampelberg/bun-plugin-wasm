@@ -37,8 +37,11 @@
     "Just": {
       "formatter": {
         "external": {
-          "command": "just",
-          "arguments": ["--dump"]
+          "command": "sh",
+          "arguments": [
+            "-c",
+            "cd $(mktemp -d) && cat > Justfile && just --dump"
+          ]
         }
       },
       "format_on_save": "on"
